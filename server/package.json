@@ -1,0 +1,42 @@
+{
+  "name": "router_assistance_server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon server.js",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NqobileRSA/Router_Assistance.git"
+  },
+  "author": "Nqobile Ngobeni",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.7.2",
+    "body-parser": "^1.20.2",
+    "cheerio": "^1.0.0-rc.12",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.3.1",
+    "express-session": "^1.18.0",
+    "express-validator": "^7.1.0",
+    "express-winston": "^4.2.0",
+    "helmet": "^7.1.0",
+    "joi": "^17.13.3",
+    "jsonwebtoken": "^9.0.2",
+    "puppeteer": "^22.12.0",
+    "winston": "^3.13.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.1"
+  },
+  "bugs": {
+    "url": "https://github.com/NqobileRSA/Router_Assistance/issues"
+  },
+  "homepage": "https://github.com/NqobileRSA/Router_Assistance#readme"
+}
