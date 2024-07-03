@@ -12,6 +12,7 @@ export const ensureBrowserInitialized = async (req, res, next) => {
         defaultViewport: null,
         executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
         args: ["--no-sandbox", "--disable-setuid-sandbox"],
+        slowMo: 10,
       });
       console.log("Browser launched successfully");
     } catch (error) {

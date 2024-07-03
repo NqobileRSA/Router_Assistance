@@ -356,8 +356,47 @@ export const blockDevice = async (req, res, next) => {
     );
     console.log("Navigated to MAC filter page");
 
-    // Implement the blocking logic here
-    // This will depend on the specific router's interface
+    // Check if MAC filtering is enabled and set to blacklist mode
+    const isFilterEnabled = await page.evaluate(() => {
+      const checkbox = document.querySelector("#EnableMacFilter");
+      return checkbox.checked;
+    });
+
+    if (!isFilterEnabled) {
+      console.log("MAC filtering is disabled. Enabling it...");
+      await page.click("#EnableMacFilter");
+      await page.waitForNavigation({ waitUntil: "networkidle0" });
+    }
+
+    const filterMode = await page.evaluate(() => {
+      const select = document.querySelector("#FilterMode");
+      return select.value;
+    });
+
+    if (filterMode !== "0") {
+      console.log("Setting filter mode to blacklist...");
+      await page.select("#FilterMode", "0");
+      await page.waitForNavigation({ waitUntil: "networkidle0" });
+    }
+    console.log("Navigated to MAC filter page");
+
+    await page.waitForSelector("#Newbutton", { timeout: 60000 });
+    await page.click("#Newbutton");
+    console.log("Clicked New button");
+
+    await page.waitForSelector("#SourceMACAddress");
+    await page.type("#SourceMACAddress", macAddress);
+    console.log("Entered MAC address");
+
+    page.on("dialog", async (dialog) => {
+      console.log("Dialog appeared:", dialog.message());
+      await dialog.accept();
+    });
+
+    console.log("Clicking Save button");
+    await page.focus("#btnApply_ex");
+    await page.click("#btnApply_ex");
+    console.log("Save button clicked, waiting for navigation");
 
     console.log("Device successfully blocked");
     res.json({ success: true, message: "Device blocked successfully" });
