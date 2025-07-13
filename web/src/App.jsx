@@ -10,6 +10,8 @@ import {
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap-icons/font/bootstrap-icons.css";
 
 const apiUrl = "http://localhost:3000/api";
 axios.defaults.withCredentials = true;
@@ -32,34 +34,53 @@ const App = () => {
 
   return (
     <Router>
-      <div>
+      <div className="container-fluid">
         <ToastContainer />
-        <nav>
-          <ul>
-            <li>
-              <Link to="/">Home</Link>
-            </li>
-            {isLoggedIn ? (
-              <>
-                <li>
-                  <Link to="/devices">Devices</Link>
+        <nav className="navbar navbar-expand-lg navbar-light bg-light mb-4">
+          <div className="container-fluid">
+            <Link className="navbar-brand" to="/">
+              <i className="bi bi-router"></i> Router Management
+            </Link>
+            <button
+              className="navbar-toggler"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#navbarNav"
+              aria-controls="navbarNav"
+              aria-expanded="false"
+              aria-label="Toggle navigation">
+              <span className="navbar-toggler-icon"></span>
+            </button>
+            <div className="collapse navbar-collapse" id="navbarNav">
+              <ul className="navbar-nav ms-auto">
+                <li className="nav-item">
+                  <Link className="nav-link" to="/">
+                    Home
+                  </Link>
                 </li>
-                <li>
-                  <Link to="/wifi">WiFi Settings</Link>
-                </li>
-                <li>
-                  <Link to="/account">Account Settings</Link>
-                </li>
-                <li>
-                  <Link to="/logout">Logout</Link>
-                </li>
-              </>
-            ) : (
-              <li>
-                <Link to="/login">Login</Link>
-              </li>
-            )}
-          </ul>
+                {isLoggedIn ? (
+                  <>
+                    <li className="nav-item">
+                      <Link className="nav-link" to="/dashboard">
+                        Dashboard
+                      </Link>
+                    </li>
+                    <li className="nav-item">
+                      <Link className="nav-link" to="/logout">
+                        Logout
+                      </Link>
+                    </li>
+                  </>
+                ) : (
+                  <li className="nav-item">
+                    <Link className="nav-link" to="/login">
+                      Login
+                    </Link>
+                  </li>
+                )}
+              </ul>
+            </div>
+          </div>
         </nav>
 
         <Routes>
@@ -68,7 +89,7 @@ const App = () => {
             path="/login"
             element={
               isLoggedIn ? (
-                <Navigate to="/" />
+                <Navigate to="/dashboard" />
               ) : (
                 <Login setIsLoggedIn={setIsLoggedIn} />
               )
@@ -77,6 +98,14 @@ const App = () => {
           <Route
             path="/logout"
             element={<Logout setIsLoggedIn={setIsLoggedIn} />}
+          />
+          <Route
+            path="/dashboard"
+            element={
+              <PrivateRoute isLoggedIn={isLoggedIn}>
+                <Dashboard />
+              </PrivateRoute>
+            }
           />
           <Route
             path="/devices"
@@ -112,7 +141,59 @@ const PrivateRoute = ({ children, isLoggedIn }) => {
   return isLoggedIn ? children : <Navigate to="/login" />;
 };
 
-const Home = () => <h1>Welcome to Router Management</h1>;
+const Home = () => (
+  <div className="jumbotron">
+    <h1 className="display-4">Welcome to Router Management</h1>
+    <p className="lead">
+      Manage your devices, WiFi settings, and account details with ease.
+    </p>
+  </div>
+);
+
+const Dashboard = () => {
+  return (
+    <div className="container">
+      <h2 className="text-center mb-4">Dashboard</h2>
+      <div className="row">
+        <DashboardCard
+          title="Connected Devices"
+          icon="bi-devices"
+          link="/devices"
+          description="View and manage connected devices"
+        />
+        <DashboardCard
+          title="WiFi Settings"
+          icon="bi-wifi"
+          link="/wifi"
+          description="Change WiFi password and settings"
+        />
+        <DashboardCard
+          title="Account Settings"
+          icon="bi-person-gear"
+          link="/account"
+          description="Update your account details"
+        />
+      </div>
+    </div>
+  );
+};
+
+const DashboardCard = ({ title, icon, link, description }) => {
+  return (
+    <div className="col-md-4 mb-4">
+      <div className="card h-100">
+        <div className="card-body text-center">
+          <i className={`bi ${icon} display-4 mb-3`}></i>
+          <h5 className="card-title">{title}</h5>
+          <p className="card-text">{description}</p>
+          <Link to={link} className="btn btn-primary">
+            Go to {title}
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const Login = ({ setIsLoggedIn }) => {
   const [username, setUsername] = useState("");
@@ -130,7 +211,7 @@ const Login = ({ setIsLoggedIn }) => {
       });
       setIsLoggedIn(true);
       toast.success(response.data.message);
-      navigate("/");
+      navigate("/dashboard");
     } catch (error) {
       toast.error(error.response?.data?.message || "Login failed");
     } finally {
@@ -139,25 +220,49 @@ const Login = ({ setIsLoggedIn }) => {
   };
 
   return (
-    <form onSubmit={handleLogin}>
-      <input
-        type="text"
-        placeholder="Username"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-        required
-      />
-      <input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        required
-      />
-      <button type="submit" disabled={isLoading}>
-        {isLoading ? "Logging in..." : "Login"}
-      </button>
-    </form>
+    <div className="row justify-content-center">
+      <div className="col-md-6">
+        <div className="card">
+          <div className="card-body">
+            <h2 className="card-title text-center mb-4">Login</h2>
+            <form onSubmit={handleLogin}>
+              <div className="mb-3">
+                <label htmlFor="username" className="form-label">
+                  Username
+                </label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id="username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="password" className="form-label">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  className="form-control"
+                  id="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+              <button
+                type="submit"
+                className="btn btn-primary w-100"
+                disabled={isLoading}>
+                {isLoading ? "Logging in..." : "Login"}
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
@@ -247,41 +352,68 @@ const Devices = () => {
 
   return (
     <div>
-      <h2>Connected Devices</h2>
+      <h2 className="mb-4">Connected Devices</h2>
       {isLoading ? (
-        <p>Loading...</p>
+        <div className="d-flex justify-content-center">
+          <div className="spinner-border" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+        </div>
       ) : (
-        <ul>
+        <div className="row">
           {devices.map((device, index) => (
-            <li key={index}>
-              {device.device} - IP: {device.ip}, MAC: {device.mac}, State:{" "}
-              {device.state}
-              <button
-                onClick={() => blockDevice(device.mac, device.device)}
-                disabled={isLoading}>
-                Block
-              </button>
-            </li>
+            <div key={index} className="col-md-6 mb-3">
+              <div className="card">
+                <div className="card-body">
+                  <h5 className="card-title">{device.device}</h5>
+                  <p className="card-text">
+                    IP: {device.ip}
+                    <br />
+                    MAC: {device.mac}
+                    <br />
+                    State: {device.state}
+                  </p>
+                  <button
+                    className="btn btn-danger"
+                    onClick={() => blockDevice(device.mac, device.device)}
+                    disabled={isLoading}>
+                    <i className="bi bi-shield-fill-x me-2"></i>
+                    Block
+                  </button>
+                </div>
+              </div>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
 
-      <h2>Blocked Devices</h2>
+      <h2 className="mt-5 mb-4">Blocked Devices</h2>
       {isLoading ? (
-        <p>Loading...</p>
+        <div className="d-flex justify-content-center">
+          <div className="spinner-border" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+        </div>
       ) : (
-        <ul>
+        <div className="row">
           {blockedDevices.map((device, index) => (
-            <li key={index}>
-              {device.deviceName} - MAC: {device.macAddress}
-              <button
-                onClick={() => unblockDevice(device.macAddress)}
-                disabled={isLoading}>
-                Unblock
-              </button>
-            </li>
+            <div key={index} className="col-md-6 mb-3">
+              <div className="card">
+                <div className="card-body">
+                  <h5 className="card-title">{device.deviceName}</h5>
+                  <p className="card-text">MAC: {device.macAddress}</p>
+                  <button
+                    className="btn btn-success"
+                    onClick={() => unblockDevice(device.macAddress)}
+                    disabled={isLoading}>
+                    <i className="bi bi-shield-fill-check me-2"></i>
+                    Unblock
+                  </button>
+                </div>
+              </div>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );
@@ -313,27 +445,63 @@ const WiFiSettings = () => {
   };
 
   return (
-    <div>
-      <h2>Change WiFi Password</h2>
-      <form onSubmit={handleChangeWifiPassword}>
-        <input
-          type="password"
-          placeholder="Current WiFi Password"
-          value={currentPassword}
-          onChange={(e) => setCurrentPassword(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="New WiFi Password"
-          value={newPassword}
-          onChange={(e) => setNewPassword(e.target.value)}
-          required
-        />
-        <button type="submit" disabled={isLoading}>
-          {isLoading ? "Changing..." : "Change WiFi Password"}
-        </button>
-      </form>
+    <div className="row justify-content-center">
+      <div className="col-md-6">
+        <div className="card">
+          <div className="card-body">
+            <h2 className="card-title text-center mb-4">
+              Change WiFi Password
+            </h2>
+            <form onSubmit={handleChangeWifiPassword}>
+              <div className="mb-3">
+                <label htmlFor="currentWifiPassword" className="form-label">
+                  Current WiFi Password
+                </label>
+                <input
+                  type="password"
+                  className="form-control"
+                  id="currentWifiPassword"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="newWifiPassword" className="form-label">
+                  New WiFi Password
+                </label>
+                <input
+                  type="password"
+                  className="form-control"
+                  id="newWifiPassword"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  required
+                />
+              </div>
+              <button
+                type="submit"
+                className="btn btn-primary w-100"
+                disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <span
+                      className="spinner-border spinner-border-sm me-2"
+                      role="status"
+                      aria-hidden="true"></span>
+                    Changing...
+                  </>
+                ) : (
+                  <>
+                    <i className="bi bi-wifi me-2"></i>
+                    Change WiFi Password
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
@@ -405,34 +573,103 @@ const AccountSettings = () => {
   };
 
   return (
-    <div>
-      <h2>Change Login Details</h2>
-      <form onSubmit={handleChangeLoginDetails}>
-        <input
-          type="password"
-          placeholder="Current Password"
-          value={currentPassword}
-          onChange={(e) => setCurrentPassword(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="New Password"
-          value={newPassword}
-          onChange={(e) => setNewPassword(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Confirm New Password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          required
-        />
-        <button type="submit" disabled={isLoading}>
-          {isLoading ? "Changing..." : "Change Login Details"}
-        </button>
-      </form>
+    <div className="row justify-content-center">
+      <div className="col-md-6">
+        <div className="card">
+          <div className="card-body">
+            <h2 className="card-title text-center mb-4">
+              Change Login Details
+            </h2>
+            <form onSubmit={handleChangeLoginDetails}>
+              <div className="mb-3">
+                <label htmlFor="currentPassword" className="form-label">
+                  Current Password
+                </label>
+                <input
+                  type="password"
+                  className="form-control"
+                  id="currentPassword"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="newPassword" className="form-label">
+                  New Password
+                </label>
+                <input
+                  type="password"
+                  className="form-control"
+                  id="newPassword"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="confirmPassword" className="form-label">
+                  Confirm New Password
+                </label>
+                <input
+                  type="password"
+                  className="form-control"
+                  id="confirmPassword"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="mb-3">
+                <h5>Password Requirements:</h5>
+                <ul className="list-group">
+                  <li className="list-group-item">
+                    <i className="bi bi-check-circle-fill text-success me-2"></i>
+                    At least 6 characters long
+                  </li>
+                  <li className="list-group-item">
+                    <i className="bi bi-check-circle-fill text-success me-2"></i>
+                    Contains at least 2 of the following:
+                    <ul>
+                      <li>Uppercase letters (A-Z)</li>
+                      <li>Lowercase letters (a-z)</li>
+                      <li>Numbers (0-9)</li>
+                      <li>{`Special characters (~!@#$%^&*()-_=+\|[{]};:'"<,>.?/)`}</li>
+                    </ul>
+                  </li>
+                  <li className="list-group-item">
+                    <i className="bi bi-check-circle-fill text-success me-2"></i>
+                    Cannot be the same as the current password
+                  </li>
+                  <li className="list-group-item">
+                    <i className="bi bi-check-circle-fill text-success me-2"></i>
+                    Cannot be the reverse of the current password
+                  </li>
+                </ul>
+              </div>
+              <button
+                type="submit"
+                className="btn btn-primary w-100"
+                disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <span
+                      className="spinner-border spinner-border-sm me-2"
+                      role="status"
+                      aria-hidden="true"></span>
+                    Changing...
+                  </>
+                ) : (
+                  <>
+                    <i className="bi bi-person-fill-gear me-2"></i>
+                    Change Login Details
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
